@@ -380,7 +380,7 @@
                 const res = await fetch('https://mcsrvstat.us/server/oyna.bumamc.com');
                 const data = await res.json();
                 document.getElementById('player-count').innerHTML = data.online ? 
-                    `<span class="text-[#D45D28] font-black">${data.players.online}</span> KOVBOY ÇÖLDE` : "SESSİZLİK HAKİM";
+                    `<span class="text-[#D45D28] font-black">${data.players.online}</span> OYUNCU` : "SESSİZLİK HAKİM";
             } catch { document.getElementById('player-count').innerText = "TELGRAF KOPUK"; }
         }
         updateStatus();
@@ -518,4 +518,5 @@
         });
     });
 </script>
+
 
