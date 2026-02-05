@@ -377,7 +377,7 @@
         // 7. API & UTILS
         async function updateStatus() {
             try {
-                const res = await fetch('https://api.mcsrvstat.us/3/oyna.bumamc.com');
+                const res = await fetch('https://mcsrvstat.us/server/oyna.bumamc.com');
                 const data = await res.json();
                 document.getElementById('player-count').innerHTML = data.online ? 
                     `<span class="text-[#D45D28] font-black">${data.players.online}</span> KOVBOY ÇÖLDE` : "SESSİZLİK HAKİM";
@@ -518,3 +518,4 @@
         });
     });
 </script>
+
