@@ -374,16 +374,43 @@
         }
         updateCursor();
 
-        // 7. API & UTILS
-        async function updateStatus() {
-            try {
-                const res = await fetch('https://mcsrvstat.us/server/oyna.bumamc.com');
-                const data = await res.json();
-                document.getElementById('player-count').innerHTML = data.online ? 
-                    `<span class="text-[#D45D28] font-black">${data.players.online}</span> OYUNCU` : "SESSİZLİK HAKİM";
-            } catch { document.getElementById('player-count').innerText = "TELGRAF KOPUK"; }
-        }
-        updateStatus();
+       // 7. API & UTILS
+ async function updateStatus() {
+     try {
+         // API adresi güncellendi (JSON verisi için api.mcsrvstat.us kullanılır)
+         const res = await fetch('https://api.mcsrvstat.us/3/oyna.bumamc.com');
+         const data = await res.json();
+         const el = document.getElementById('player-count');
+
+         if (data.online && data.players.online > 0) {
+             // Sunucu açık ve oyuncu varsa
+             el.innerHTML = `<span class="text-[#D45D28] font-black">${data.players.online}</span> OYUNCU`;
+         } else {
+             // Sunucu kapalıysa veya kimse yoksa
+             el.innerText = "SESSİZLİK HAKİM";
+         }
+     } catch { 
+         document.getElementById('player-count').innerText = "TELGRAF KOPUK"; 
+     }
+ }
+ updateStatus();
+ // Her 60 saniyede bir otomatik yeniler
+ setInterval(updateStatus, 60000);
+
+ function copyIP(e) {
+     navigator.clipboard.writeText("oyna.bumamc.com");
+     // Konfeti kütüphanesinin (canvas-confetti) yüklü olduğundan emin ol agam
+     if (typeof confetti === 'function') {
+         confetti({
+             particleCount: 40, spread: 50,
+             origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight },
+             colors: ['#D45D28', '#ffffff']
+         });
+     }
+     const el = document.getElementById('server-ip');
+     const old = el.innerText; el.innerText = "KOPYALANDI!";
+     setTimeout(() => el.innerText = old, 1500);
+ }
 
         function copyIP(e) {
             navigator.clipboard.writeText("oyna.bumamc.com");
@@ -395,6 +422,7 @@
             const el = document.getElementById('server-ip');
             const old = el.innerText; el.innerText = "KOPYALANDI!";
             setTimeout(() => el.innerText = old, 1500);
+            
         }
     </script>
 </body>
@@ -518,5 +546,6 @@
         });
     });
 </script>
+
 
 
