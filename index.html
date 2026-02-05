@@ -3,339 +3,518 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buma Network | Elit Hardcore SMP</title>
+    <title>Buma Network | Outlaw SMP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
         :root {
-            --bg-dark: #030303;
-            --accent-blue: #0047FF;
-            --accent-violet: #8B5CF6;
-            --accent-amber: #F59E0B;
+            --bg-dark: #070404;
+            --accent-orange: #D45D28;
+            --accent-blood: #5C2018;
+            --text-off-white: #e0e0e0;
         }
 
         body {
             background-color: var(--bg-dark);
-            color: #ffffff;
+            color: var(--text-off-white);
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             cursor: none;
         }
 
-        h1, h2, .font-space { font-family: 'Space Grotesk', sans-serif; }
+        /* Performance Optimizations */
+        .tilt-card, .mesh-blob, #custom-cursor, .btn-magnetic, .nav-link, h1, .wanted-card {
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
 
-        /* --- Animated Mesh Gradient Background --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 100000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Space Grotesk';
+        }
+
+        #ember-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #bullet-nav {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .bullet {
+            width: 2px; height: 30px;
+            background: rgba(212, 93, 40, 0.2);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            background: var(--accent-orange);
+            width: 0%;
+            z-index: 99999;
+            box-shadow: 0 0 15px var(--accent-orange);
+        }
+
+        .wanted-card { transition: filter 0.5s ease; }
+        .wanted-card:hover { filter: sepia(0.5) contrast(1.1) brightness(0.9); }
+
         .mesh-container {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            inset: 0;
             z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #0a0404 0%, #000000 100%);
             overflow: hidden;
-            background: radial-gradient(circle at 50% 50%, #080808 0%, #000 100%);
         }
 
-        .mesh-blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.4;
-            animation: move 20s infinite alternate cubic-bezier(0.45, 0, 0.55, 1);
-        }
-
-        .blob-1 { width: 600px; height: 600px; background: var(--accent-blue); top: -10%; left: -10%; }
-        .blob-2 { width: 500px; height: 500px; background: var(--accent-violet); bottom: -10%; right: -5%; animation-delay: -5s; }
-        .blob-3 { width: 400px; height: 400px; background: var(--accent-amber); top: 40%; left: 30%; opacity: 0.15; animation-duration: 25s; }
-
-        @keyframes move {
-            from { transform: translate(0, 0) scale(1); }
-            to { transform: translate(10vw, 15vh) scale(1.2); }
-        }
-
-        /* --- Apple-Style Glassmorphism & Bento --- */
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .glass:hover {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-5px);
-        }
-
-        /* --- Magnetic Cursor --- */
         #custom-cursor {
-            width: 20px; height: 20px;
-            background: #fff;
+            width: 8px; height: 8px;
+            background: var(--accent-orange);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+        }
+
+        #cursor-ring {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(212, 93, 40, 0.4);
             border-radius: 50%;
             position: fixed;
             pointer-events: none;
             z-index: 9999;
-            mix-blend-mode: difference;
-            transition: transform 0.15s ease-out;
+            top: -16px; left: -16px;
         }
 
-        /* --- Typography Effects --- */
-        .text-gradient {
-            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.4) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        .reveal { opacity: 0; transform: translateY(30px); }
 
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-
-        .btn-magnetic {
-            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            display: inline-block;
-        }
-
-        /* Border Glow Effect */
-        .glow-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.15) 0%, transparent 80%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-        .glow-card:hover::before { opacity: 1; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-orange); }
     </style>
 </head>
-<body class="antialiased selection:bg-blue-500 selection:text-white">
+<body class="antialiased selection:bg-[#D45D28] selection:text-black">
 
-    <div id="custom-cursor"></div>
-
-    <div class="mesh-container">
-        <div class="mesh-blob blob-1"></div>
-        <div class="mesh-blob blob-2"></div>
-        <div class="mesh-blob blob-3"></div>
+    <div id="loader">
+        <div class="text-white text-4xl font-black italic tracking-tighter">
+            BUMA <span class="text-[#D45D28]">NETWORK</span>
+        </div>
     </div>
 
-    <nav class="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
-        <div class="text-xl font-black tracking-tighter font-space italic">BUMA NETWORK</div>
-        <div class="hidden md:flex space-x-8 text-sm font-medium tracking-widest uppercase opacity-60">
-            <a href="#manifesto" class="hover:opacity-100 transition-opacity">Manifesto</a>
-            <a href="#features" class="hover:opacity-100 transition-opacity">Mimari</a>
-            <a href="#rules" class="hover:opacity-100 transition-opacity">Yasalar</a>
+    <canvas id="ember-canvas"></canvas>
+    <div id="progress-bar"></div>
+    <div id="custom-cursor"></div>
+    <div id="cursor-ring"></div>
+
+    <div id="bullet-nav" class="hidden lg:flex">
+        <div class="bullet"></div>
+        <div class="bullet"></div>
+        <div class="bullet"></div>
+    </div>
+
+    <div class="mesh-container">
+        <div class="mesh-blob blob-1 absolute w-[800px] h-[800px] bg-[#5C2018]/15 blur-[120px] rounded-full -bottom-20 -left-20"></div>
+        <div class="mesh-blob blob-2 absolute w-[600px] h-[600px] bg-[#D45D28]/10 blur-[120px] rounded-full -top-20 -right-20"></div>
+    </div>
+
+    <nav class="fixed top-0 w-full z-50 px-6 md:px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5 bg-black/20">
+        <div class="text-2xl font-black tracking-tighter font-space italic text-white">
+            BUMA <span class="text-[#D45D28]">NETWORK</span>
         </div>
-        <a href="https://discord.gg/WNRg4GZh" target="_blank" class="glass px-5 py-2 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-all">Discord</a>
+        
+        <div class="hidden md:flex space-x-10 text-xs font-bold tracking-[0.2em] uppercase text-white/70">
+            <a href="#manifesto" class="nav-link btn-magnetic hover:text-white transition-colors py-1">Manifesto</a>
+            <a href="#features" class="nav-link btn-magnetic hover:text-white transition-colors py-1">Bölge</a>
+            <a href="#rules" class="nav-link btn-magnetic hover:text-white transition-colors py-1">Şerif</a>
+        </div>
+
+        <div class="hidden md:flex items-center gap-4">
+            <a href="https://discord.gg/WNRg4GZh" target="_blank" class="btn-magnetic px-6 py-2 bg-white/5 border border-white/10 hover:bg-[#D45D28] hover:text-black transition-all rounded-sm text-xs font-black tracking-widest uppercase">
+                Discord
+            </a>
+        </div>
     </nav>
 
-    <section class="min-height-screen pt-40 pb-20 px-6 flex flex-col items-center text-center">
-        <div class="reveal">
-            <span class="inline-block px-4 py-1 rounded-full glass text-[10px] font-bold tracking-[0.3em] uppercase mb-6 text-blue-400">Teknik Üstünlük & Saf Deneyim</span>
-            <h1 class="text-6xl md:text-9xl font-black tracking-tighter mb-8 leading-none font-space">
-                BURASI <br> <span class="text-gradient">HERKES İÇİN DEĞİL.</span>
-            </h1>
-            <p class="max-w-2xl mx-auto text-lg md:text-xl opacity-50 font-light leading-relaxed">
-                Buma Network: Minecraft'ın en saf ve en acımasız hali. <br>
-                Pluginlerin arkasına saklanmayanlar için tasarlandı.
-            </p>
-        </div>
-
-        <div class="mt-16 reveal glass p-2 rounded-3xl inline-flex items-center space-x-4 border border-white/10 shadow-2xl">
-            <div class="px-6 py-4 bg-white/5 rounded-2xl flex items-center space-x-4">
-                <div class="relative flex h-3 w-3">
-                    <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span id="status-dot" class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                </div>
-                <code id="server-ip" class="text-xl font-bold font-space tracking-wider">oyna.bumamc.com</code>
-                <button onclick="copyIP()" class="ml-4 hover:scale-110 transition-transform active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-40 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2h-6a2 2 0 00-2 2z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11H4a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2v-4" />
-                    </svg>
-                </button>
+    <section class="min-h-screen flex flex-col justify-center items-center text-center px-6 pt-20 relative">
+        <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#D45D28]/30 bg-[#D45D28]/10 mb-8 reveal">
+                <span class="w-2 h-2 rounded-full bg-[#D45D28] animate-pulse"></span>
+                <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D45D28]">Korkaklar İçin Yolun Sonu</span>
             </div>
-            <div class="pr-8 py-4">
-                <span id="player-count" class="text-sm font-bold opacity-80">Yükleniyor...</span>
+            
+            <h1 id="hero-title" class="text-6xl md:text-[9rem] font-black tracking-tighter leading-[0.85] font-space uppercase mb-8 reveal">
+                YAŞAMAK <br> 
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#D45D28] via-white to-[#D45D28] bg-300%">ÖLÜMDÜR</span>
+            </h1>
+            
+            <p class="max-w-2xl mx-auto text-lg text-white/50 font-light leading-relaxed mb-12 reveal">
+                Buma Network'te kural yok, sadece sonuçlar var. <br>
+                <span class="text-white border-b border-[#D45D28]/30 pb-1">oyna.bumamc.com</span> adresinde tarihinizi yazın.
+            </p>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 reveal">
+                <div class="tilt-card px-10 py-5 rounded-2xl flex items-center gap-5 group cursor-pointer bg-white/5 border border-white/10" onclick="copyIP(event)">
+                    <div class="text-left">
+                        <div class="text-[10px] text-[#D45D28] font-bold tracking-widest uppercase mb-1">Katılmak İçin Tıkla</div>
+                        <code id="server-ip" class="text-2xl font-bold font-space text-white group-hover:text-[#D45D28] transition-colors">oyna.bumamc.com</code>
+                    </div>
+                </div>
+                <div class="flex flex-col items-start">
+                    <div id="player-count" class="text-xs font-mono text-white/40 tracking-widest uppercase">
+                        Yükleniyor...
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <section id="manifesto" class="py-32 px-6 max-w-7xl mx-auto">
+    <section id="manifesto" class="py-40 px-6 max-w-7xl mx-auto relative z-10">
         <div class="grid md:grid-cols-2 gap-20 items-center">
-            <div class="reveal">
-                <h2 class="text-4xl md:text-6xl font-black font-space mb-8">NEDEN <br><span class="text-blue-500 italic underline">CLAİMSİZ?</span></h2>
-                <p class="text-xl opacity-60 leading-relaxed mb-6 font-light">
-                    Biz onuru pluginlere emanet etmiyoruz. Buma Network, güvenin ve itibarın tek para birimi olduğu bir dünyadır. 
-                    Koruma bloğu yok, sahte güvenlik hissi yok.
+            <div class="reveal-scroll">
+                <h2 class="text-5xl md:text-7xl font-black font-space mb-10 uppercase leading-none">
+                    KANUN <br> <span class="text-[#D45D28]">BİZSİZ.</span>
+                </h2>
+                <p class="text-xl text-white/40 leading-relaxed mb-8">
+                    Claim blokları arkasına saklanamazsın. Burada her blok, her sandık ve her nefes bir savaş sebebidir.
                 </p>
-                <blockquote class="border-l-4 border-blue-600 pl-6 text-2xl font-space italic text-white/90">
-                    "Para kaygısı yok, kalite çok."
-                </blockquote>
+                <div class="inline-block px-6 py-3 border border-[#D45D28]/50 text-[#D45D28] font-bold italic">
+                    "Güneş batarken, silahını çek."
+                </div>
             </div>
-            <div class="reveal glass p-10 rounded-[3rem] border-white/5 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-3xl"></div>
-                <h3 class="text-2xl font-bold mb-4">Filozofimiz</h3>
-                <ul class="space-y-4 opacity-70">
-                    <li>• P2W (Pay to Win) unsurlarından tamamen arındırılmış.</li>
-                    <li>• Market yok, köylü ticareti ve takas esastır.</li>
-                    <li>• Diplomasi, kılıçtan daha keskindir.</li>
-                    <li>• Her şey %100 vanilla mekanikleriyle işler.</li>
+            
+            <div class="wanted-card tilt-card p-12 rounded-sm border-2 border-[#D45D28]/20 relative reveal-scroll">
+                <div class="absolute -top-4 -left-4 w-10 h-10 border-t-2 border-l-2 border-[#D45D28]"></div>
+                <div class="absolute -bottom-4 -right-4 w-10 h-10 border-b-2 border-r-2 border-[#D45D28]"></div>
+                
+                <h3 class="text-3xl font-black mb-8 text-white font-space tracking-tighter">İLKELER</h3>
+                <ul class="space-y-8">
+                    <li class="group shop-item">
+                        <span class="text-[#D45D28] font-mono text-xs block mb-2">01 / EKONOMİ</span>
+                        <h4 class="text-xl font-bold text-white group-hover:translate-x-2 transition-transform">TAMAMEN OYUNCU TABANLI</h4>
+                    </li>
+                    <li class="group shop-item">
+                        <span class="text-[#D45D28] font-mono text-xs block mb-2">02 / SAVAŞ</span>
+                        <h4 class="text-xl font-bold text-white group-hover:translate-x-2 transition-transform">SINIRSIZ YAĞMA VE KAN</h4>
+                    </li>
                 </ul>
             </div>
         </div>
     </section>
 
-    <section id="features" class="py-32 px-6 max-w-7xl mx-auto">
-        <div class="text-center mb-20 reveal">
-            <h2 class="text-4xl font-black font-space">SUNUCU MİMARİSİ</h2>
+    <footer class="py-20 text-center border-t border-white/5 relative z-10">
+        <div class="opacity-30 text-[10px] font-mono tracking-[0.5em] uppercase">
+            Buma Network 2026 // No Mercy, Only Glory.
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="md:col-span-2 glass p-12 rounded-[2.5rem] glow-card relative overflow-hidden reveal">
-                <h3 class="text-3xl font-black font-space mb-4">Sıfır Gecikme (Low Latency)</h3>
-                <p class="opacity-50 text-lg max-w-md">Yüksek optimizasyonlu kernel yapımız ile 20 TPS sabit performans. En yoğun savaşlarda bile milisaniyelik tepki hızı.</p>
-                <div class="mt-8 flex space-x-2">
-                    <span class="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold">DDR5 RAM</span>
-                    <span class="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold">NVMe SSD</span>
-                </div>
-            </div>
-
-            <div class="glass p-12 rounded-[2.5rem] glow-card reveal">
-                <h3 class="text-3xl font-black font-space mb-4">Global Uyum</h3>
-                <p class="opacity-50">1.16.5'ten 1.21 ve üzerine kadar tüm sürümlerle kusursuz senkronizasyon.</p>
-                <div class="mt-20 text-6xl font-bold opacity-10">1.21+</div>
-            </div>
-
-            <div class="glass p-10 rounded-[2.5rem] glow-card reveal">
-                <h4 class="text-xl font-bold mb-2 font-space tracking-tight">Seçkin Topluluk</h4>
-                <p class="opacity-50 text-sm italic">Whitelist ruhuyla yönetilen, toksisiteden arınmış bir elit ortam.</p>
-            </div>
-
-            <div class="md:col-span-2 glass p-10 rounded-[2.5rem] glow-card flex items-center justify-between reveal">
-                <div>
-                    <h4 class="text-xl font-bold mb-2 font-space tracking-tight">Hardcore Vanilla</h4>
-                    <p class="opacity-50 text-sm">Eklenti kirliliği yok. Sadece sen ve doğa.</p>
-                </div>
-                <div class="text-right">
-                    <span class="text-xs font-mono opacity-30">TYPE: PURE_SMP</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="rules" class="py-32 px-6 bg-white/[0.02] border-y border-white/5">
-        <div class="max-w-4xl mx-auto reveal">
-            <h2 class="text-center text-4xl font-black font-space mb-20 tracking-widest uppercase italic">YASALAR (THE LAW)</h2>
-            <div class="space-y-12">
-                <div class="flex items-start space-x-8">
-                    <span class="text-4xl font-black font-space opacity-20">01</span>
-                    <div>
-                        <h4 class="text-2xl font-bold mb-2">Hile Yasaktır</h4>
-                        <p class="opacity-50 leading-relaxed text-lg font-light tracking-wide">Teknik üstünlük emekle kazanılır. Yazılımla değil. Her türlü 3. parti yazılım kalıcı yasaklanma sebebidir.</p>
-                    </div>
-                </div>
-                <div class="flex items-start space-x-8 border-t border-white/5 pt-12">
-                    <span class="text-4xl font-black font-space opacity-20">02</span>
-                    <div>
-                        <h4 class="text-2xl font-bold mb-2">Saygı Esastır</h4>
-                        <p class="opacity-50 leading-relaxed text-lg font-light tracking-wide">Topluluk içindeki duruşunuz, kılıcınızdan daha önemlidir. Elit bir iletişim dili zorunluluktur.</p>
-                    </div>
-                </div>
-                <div class="flex items-start space-x-8 border-t border-white/5 pt-12">
-                    <span class="text-4xl font-black font-space opacity-20">03</span>
-                    <div>
-                        <h4 class="text-2xl font-bold mb-2">Diplomatik Adalet</h4>
-                        <p class="opacity-50 leading-relaxed text-lg font-light tracking-wide">Claim yok ancak hırsızlık ve saldırıların bir bedeli var. Emek hırsızlığına topluluk diplomasisiyle yanıt verilir.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-40 px-6 text-center">
-        <div class="reveal">
-            <h2 class="text-5xl md:text-7xl font-black font-space mb-12">SİSTEME <span class="text-blue-600 italic">KATILIN</span></h2>
-            <a href="https://discord.gg/WNRg4GZh" target="_blank" class="btn-magnetic group relative px-12 py-6 bg-white text-black font-black font-space tracking-[0.2em] rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.2)]">
-                <span class="relative z-10">DISCORD'A BAĞLAN</span>
-                <div class="absolute inset-0 bg-blue-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-            </a>
-        </div>
-    </section>
-
-    <footer class="py-10 text-center opacity-30 text-xs font-mono tracking-widest uppercase">
-        © 2026 BUMA NETWORK — NO PROFIT, TOTAL QUALITY.
     </footer>
 
     <script>
-        // --- Custom Cursor & Magnetic Effect ---
-        const cursor = document.getElementById('custom-cursor');
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
-            
-            // Bento Grid Mouse Glow Effect
-            document.querySelectorAll('.glow-card').forEach(card => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                card.style.setProperty('--mouse-x', `${x}px`);
-                card.style.setProperty('--mouse-y', `${y}px`);
-            });
+        gsap.registerPlugin(ScrollTrigger, TextPlugin);
+
+        // 1. LENIS SMOOTH SCROLL (Enhanced Physics)
+        const lenis = new Lenis({ 
+            duration: 1.4,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            orientation: 'vertical',
+            smoothWheel: true
         });
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
 
-        // Magnetic Buttons
-        const magnets = document.querySelectorAll('.btn-magnetic');
-        magnets.forEach((btn) => {
-            btn.addEventListener('mousemove', (e) => {
-                const rect = btn.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
-            });
-            btn.addEventListener('mouseleave', () => {
-                btn.style.transform = 'translate(0px, 0px)';
-            });
-        });
+        // 2. TEXT SCRAMBLE EFFECT
+        const scrambleText = (element) => {
+            const originalText = element.innerText;
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&*";
+            let iteration = 0;
+            const interval = setInterval(() => {
+                element.innerText = originalText.split("").map((letter, index) => {
+                    if(index < iteration) return originalText[index];
+                    return chars[Math.floor(Math.random() * chars.length)];
+                }).join("");
+                if(iteration >= originalText.length) clearInterval(interval);
+                iteration += 1 / 3;
+            }, 30);
+        };
 
-        // --- Intersection Observer for Scroll Reveals ---
-        const observerOptions = { threshold: 0.1 };
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, observerOptions);
+        // 3. EMBER SYSTEM
+        const canvas = document.getElementById('ember-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+        window.addEventListener('resize', resize);
+        resize();
 
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        // --- Minecraft Server Status API ---
-        async function updateStatus() {
-            try {
-                const response = await fetch('https://api.mcsrvstat.us/3/oyna.bumamc.com');
-                const data = await response.json();
-                const countEl = document.getElementById('player-count');
-                const pingEl = document.getElementById('status-ping');
-                const dotEl = document.getElementById('status-dot');
-
-                if (data.online) {
-                    countEl.innerText = `${data.players.online} / ${data.players.max} OYUNCU AKTİF`;
-                    pingEl.classList.replace('bg-red-400', 'bg-green-400');
-                    dotEl.classList.replace('bg-red-500', 'bg-green-500');
-                } else {
-                    countEl.innerText = "SUNUCU ÇEVRİMDIŞI";
-                    pingEl.classList.replace('bg-green-400', 'bg-red-400');
-                    dotEl.classList.replace('bg-green-500', 'bg-red-500');
-                }
-            } catch (err) {
-                document.getElementById('player-count').innerText = "VERİ ALINAMADI";
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 100;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedY = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 1;
+                this.life = Math.random() * 100 + 50;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX + Math.sin(this.y * 0.01) * 0.5;
+                this.life--;
+                if (this.life <= 0) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(212, 93, 40, ${this.opacity})`;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
         }
-        updateStatus();
-        setInterval(updateStatus, 60000); // Her dakika güncelle
+        for (let i = 0; i < 50; i++) particles.push(new Particle());
+        function animateEmbers() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateEmbers);
+        }
+        animateEmbers();
 
-        // Copy IP Function
-        function copyIP() {
-            const ip = document.getElementById('server-ip').innerText;
-            navigator.clipboard.writeText(ip);
-            alert("Sunucu adresi kopyalandı: " + ip);
+        // 4. PARALLAX MESH & SCROLL LOGIC
+        gsap.to(".blob-1", {
+            scrollTrigger: { scrub: 1 },
+            y: -200, x: 100, scale: 1.2
+        });
+        gsap.to(".blob-2", {
+            scrollTrigger: { scrub: 1 },
+            y: 200, x: -100, scale: 0.8
+        });
+
+        // 5. MAGNETIC & REVEALS
+        window.addEventListener('load', () => {
+            gsap.to("#loader", { 
+                opacity: 0, duration: 1, delay: 0.5, 
+                onComplete: () => {
+                    document.getElementById('loader').style.display = 'none';
+                    scrambleText(document.querySelector('#hero-title'));
+                    gsap.to(".reveal", { opacity: 1, y: 0, stagger: 0.1, duration: 1, ease: "expo.out" });
+                } 
+            });
+        });
+
+        // Staggered Reveal for Shop Items (Intersection Observer via GSAP)
+        gsap.from(".reveal-scroll", {
+            scrollTrigger: {
+                trigger: "#manifesto",
+                start: "top 80%",
+            },
+            opacity: 0, y: 50, stagger: 0.2, duration: 1, ease: "power3.out"
+        });
+
+        // Magnetic Effect
+        document.querySelectorAll('.btn-magnetic').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = (e.clientX - rect.left - rect.width/2) * 0.4;
+                const y = (e.clientY - rect.top - rect.height/2) * 0.4;
+                gsap.to(btn, { x, y, duration: 0.3 });
+            });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.3)" });
+            });
+        });
+
+        // 3D Tilt Card
+        document.querySelectorAll('.tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const { left, top, width, height } = card.getBoundingClientRect();
+                const x = (e.clientX - left) / width - 0.5;
+                const y = (e.clientY - top) / height - 0.5;
+                gsap.to(card, { rotationY: x * 10, rotationX: -y * 10, transformPerspective: 1000, duration: 0.4 });
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, { rotationY: 0, rotationX: 0, duration: 0.7 });
+            });
+        });
+
+        // 6. CUSTOM CURSOR
+        const cursor = document.getElementById('custom-cursor');
+        const ring = document.getElementById('cursor-ring');
+        let mX = 0, mY = 0, rX = 0, rY = 0;
+        window.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
+        function updateCursor() {
+            rX += (mX - rX) * 0.15; rY += (mY - rY) * 0.15;
+            cursor.style.left = `${mX}px`; cursor.style.top = `${mY}px`;
+            ring.style.left = `${rX}px`; ring.style.top = `${rY}px`;
+            requestAnimationFrame(updateCursor);
+        }
+        updateCursor();
+
+        // 7. API & UTILS
+        async function updateStatus() {
+            try {
+                const res = await fetch('https://api.mcsrvstat.us/3/oyna.bumamc.com');
+                const data = await res.json();
+                document.getElementById('player-count').innerHTML = data.online ? 
+                    `<span class="text-[#D45D28] font-black">${data.players.online}</span> KOVBOY ÇÖLDE` : "SESSİZLİK HAKİM";
+            } catch { document.getElementById('player-count').innerText = "TELGRAF KOPUK"; }
+        }
+        updateStatus();
+
+        function copyIP(e) {
+            navigator.clipboard.writeText("oyna.bumamc.com");
+            confetti({
+                particleCount: 40, spread: 50,
+                origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight },
+                colors: ['#D45D28', '#ffffff']
+            });
+            const el = document.getElementById('server-ip');
+            const old = el.innerText; el.innerText = "KOPYALANDI!";
+            setTimeout(() => el.innerText = old, 1500);
         }
     </script>
 </body>
 </html>
+<section id="features" class="py-32 px-6 relative z-10 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-6 reveal-scroll">
+                <div>
+                    <h2 class="text-5xl md:text-8xl font-black font-space tracking-tighter uppercase italic">Vahşi <br><span class="text-[#D45D28]">Bölgeler</span></h2>
+                </div>
+                <p class="max-w-md text-white/40 text-sm md:text-base leading-relaxed uppercase tracking-widest font-mono">
+                    Her koordinat bir risk, her biyom bir mezar. Nereye gittiğine dikkat et outlaw.
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="tilt-card group relative bg-white/5 border border-white/10 p-10 overflow-hidden reveal-scroll">
+                    <div class="absolute top-0 right-0 p-6 text-6 font-black opacity-5 group-hover:opacity-20 transition-opacity italic font-space text-6xl">01</div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-[1px] bg-[#D45D28] mb-8 group-hover:w-full transition-all duration-700"></div>
+                        <h4 class="text-2xl font-bold mb-4 font-space italic">MERKEZ KASABA</h4>
+                        <p class="text-white/50 text-sm leading-relaxed mb-6">Ticaretin tek adresi ama adaletin uğramadığı yer. Pazarlık yaparken elin kılıcında olsun.</p>
+                        <ul class="text-[10px] font-mono tracking-tighter text-[#D45D28] space-y-2 opacity-60">
+                            <li>> GÜVENLİ BÖLGE: YOK</li>
+                            <li>> TİCARET: AKTİF</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tilt-card group relative bg-white/5 border border-white/10 p-10 overflow-hidden reveal-scroll">
+                    <div class="absolute top-0 right-0 p-6 text-6 font-black opacity-5 group-hover:opacity-20 transition-opacity italic font-space text-6xl">02</div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-[1px] bg-[#D45D28] mb-8 group-hover:w-full transition-all duration-700"></div>
+                        <h4 class="text-2xl font-bold mb-4 font-space italic">MADEN HAVZASI</h4>
+                        <p class="text-white/50 text-sm leading-relaxed mb-6">Yerin yedi kat dibinde zenginlik var. Ama karanlıkta parlayan tek şey elmaslar değil, rakiplerinin gözleri.</p>
+                        <ul class="text-[10px] font-mono tracking-tighter text-[#D45D28] space-y-2 opacity-60">
+                            <li>> KAYNAK: YÜKSEK</li>
+                            <li>> RİSK: KRİTİK</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tilt-card group relative bg-white/5 border border-white/10 p-10 overflow-hidden reveal-scroll">
+                    <div class="absolute top-0 right-0 p-6 text-6 font-black opacity-5 group-hover:opacity-20 transition-opacity italic font-space text-6xl">03</div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-[1px] bg-[#D45D28] mb-8 group-hover:w-full transition-all duration-700"></div>
+                        <h4 class="text-2xl font-bold mb-4 font-space italic">DIŞ TOPRAKLAR</h4>
+                        <p class="text-white/50 text-sm leading-relaxed mb-6">Burada harita bitiyor, medeniyet ölüyor. Sadece en güçlü klanların bayrak dikebildiği sahipsiz vatan.</p>
+                        <ul class="text-[10px] font-mono tracking-tighter text-[#D45D28] space-y-2 opacity-60">
+                            <li>> YAĞMA: SINIRSIZ</li>
+                            <li>> KLAN SAVAŞI: %100</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="rules" class="py-40 px-6 relative z-10">
+        <div class="max-w-5xl mx-auto text-center reveal-scroll">
+            <div class="inline-block mb-10">
+                <div class="flex items-center gap-4 px-6 py-2 border-x border-[#D45D28] bg-[#D45D28]/5 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#D45D28]/10 to-transparent animate-pulse"></div>
+                    <span class="text-xs font-black tracking-[0.4em] uppercase text-[#D45D28]">ANTI-CHEAT & JUSTICE</span>
+                </div>
+            </div>
+            
+            <h2 class="text-4xl md:text-7xl font-black font-space mb-8 tracking-tighter uppercase leading-none">
+                KASABADA <span class="text-[#D45D28]">YENİ BİR</span> <br> ŞERİF VAR
+            </h2>
+            
+            <p class="text-lg md:text-xl text-white/50 mb-16 max-w-2xl mx-auto italic font-light">
+                "Hileyle kazandığın her şey, sistemin demir yumruğuyla senden alınır. Adalet bizde bir seçenek değil, zorunluluktur."
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="p-8 border border-white/5 bg-black/40 text-left hover:border-[#D45D28]/30 transition-all">
+                    <h5 class="text-[#D45D28] font-bold mb-4 italic uppercase tracking-widest text-sm">// Savaş Kuralları</h5>
+                    <p class="text-sm text-white/60 leading-relaxed font-light">Savaş sırasında sunucudan çıkmak (Combat Log) karakterinin otomatik infazı ve item kaybıyla sonuçlanır. Geri dönüşü yok.</p>
+                </div>
+                <div class="p-8 border border-white/5 bg-black/40 text-left hover:border-[#D45D28]/30 transition-all">
+                    <h5 class="text-[#D45D28] font-bold mb-4 italic uppercase tracking-widest text-sm">// Hile & Exploits</h5>
+                    <p class="text-sm text-white/60 leading-relaxed font-light">Buma Anti-Cheat her hareketi loglar. Haksız kazanç sağlayan her "outlaw", kasabadan sonsuza kadar sürülür.</p>
+                </div>
+            </div>
+            
+            <div class="mt-20 flex flex-wrap justify-center gap-6 reveal-scroll">
+                <a href="#" class="btn-magnetic px-12 py-5 bg-[#D45D28] text-black font-black uppercase text-xs tracking-widest hover:scale-105 transition-transform active:scale-95">
+                    Tüm Yasaları Gör
+                </a>
+            </div>
+        </div>
+    </section>
+
+<script>
+    // Mobil Navigasyon Optimizasyonu
+    if (window.innerWidth < 1024) {
+        // Mobilde imleci kapat ama dokunmatiği bozma
+        document.body.style.cursor = 'auto';
+        document.getElementById('custom-cursor').style.display = 'none';
+        document.getElementById('cursor-ring').style.display = 'none';
+        
+        // Mobil menü dokunmatik hassasiyeti (Lenis ayarı)
+        lenis.options.wheelMultiplier = 0.5;
+    }
+
+    // Bullet Nav Update (Aktif bölgeyi gösterir)
+    const bullets = document.querySelectorAll('.bullet');
+    const sections = ['#manifesto', '#features', '#rules'];
+    
+    window.addEventListener('scroll', () => {
+        sections.forEach((id, i) => {
+            const rect = document.querySelector(id).getBoundingClientRect();
+            if (rect.top < window.innerHeight/2 && rect.bottom > window.innerHeight/2) {
+                bullets.forEach(b => b.style.background = 'rgba(212, 93, 40, 0.2)');
+                bullets[i].style.background = '#D45D28';
+                bullets[i].style.height = '60px';
+            } else {
+                bullets[i].style.height = '30px';
+            }
+        });
+    });
+</script>
